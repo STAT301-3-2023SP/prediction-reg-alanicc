@@ -105,6 +105,6 @@ map(cat_var, boxplot_log_fun)
 
 # save results 
 
-save(train_data, test_data, train, test, my_split, file = "data/processed/data_stuff.rda")
+save(train_data, test_data, train, test, my_split, file = "data/processed/data_setup.rda")
 
 # find . -size +100M | sed 's|^\./||g' | cat >> .gitignore; awk '!NF || !seen[$0]++' .gitignore
