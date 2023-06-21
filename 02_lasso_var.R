@@ -9,7 +9,7 @@ tidymodels_prefer()
 
 # load data
 load("data/processed/data_setup.rda")
-# load("results/kitchen_sink.rda") ##COMPLETE
+load("data/results/kitchen_sink.rda")
 
 
 # set seed
@@ -54,13 +54,13 @@ lasso_tune <- tune_grid(
 
 # save results
 save(lasso_tune,
-     file = "results/lasso_var_tune.rda")
+     file = "data/results/lasso_var_tune.rda")
 
 
 
 # load data
-load("results/lasso_var_tune.rda")
-load("results/lasso_var_specs.rda")
+load("data/results/lasso_var_tune.rda")
+load("data/results/lasso_var_specs.rda")
 
 
 # final workflow
@@ -90,10 +90,10 @@ train_clean_1 <- train_data %>%
 train_clean_2 <- train_data %>%
   select("x006", "x014", "x017", "x022", "x045", "y", "id")
 
-train_cleanest <- merge(x = train_clean-1, y = train_clean_2)
+train_cleanest <- merge(x = train_clean_1, y = train_clean_2)
 
 write_rds(train_cleanest, file = "data/processed/train_cleanest.rds")
 
-save(lasso_fit_1, lasso_vars_1, file = "results/lasso_var_specs.rda")
+save(lasso_fit_1, lasso_vars_1, file = "data/results/lasso_var_specs.rda")
 
-save(train_clean_1, file = "results/train_clean-1.rda")
+save(train_clean_1, file = "data/results/train_clean-1.rda")
