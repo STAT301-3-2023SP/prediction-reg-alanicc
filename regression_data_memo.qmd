@@ -1,0 +1,112 @@
+---
+title: "Regression Prediction Problem"
+subtitle: "Data Science 3 with R (STAT 301-3)"
+author: "Alani Cox-Caceres"
+
+format:
+  html:
+    toc: true
+    embed-resources: true
+    code-fold: show
+    link-external-newwindow: true
+    echo: false
+    
+execute:
+  warning: false
+  message: false
+
+from: markdown+emoji 
+---
+
+## Github Repository
+[https://github.com/STAT301-3-2023SP/prediction-reg-alanicc](https://github.com/STAT301-3-2023SP/prediction-reg-alanicc)
+
+# Data Overview
+This dataset came from Kaggle as a sample set to use for the competition. The training data contained 767 variables with 5,500 entries. The testing data contained 766 with 4,500 entries.
+
+# Goal
+The goal of this regression prediction project is to create a machine learning model that can achieve an `rmse` below 9.0.
+
+# Initial Exploration
+After skimming the data and performing an initial exploration, I discovered that there was data missing in both the training and testing sets. The training data had a total number of 34,729 missing values, and the testing data had 31,004 missing values. The variables missing had a missingness percentage of 17%. Knowing this, I stratified my y variable and split my data using .75 as the proportion. 
+
+## Summary of Missingness
+```{r}
+# load packages
+library(tidyverse)
+library(tidymodels)
+library(naniar)
+library(ggpubr)
+
+
+test <- read_csv("data/raw/test.csv")
+train <- read_csv("data/raw/train.csv")
+
+# set seed
+set.seed(1234)
+
+# skim for missingness
+miss_var_summary(train)
+miss_var_summary(test)
+```
+
+## Addressing Missingness
+To remedy the missingness in the dataset, I used `na.omit` to remove these values from the dataset.
+
+
+# Variable Selection
+I used a random forest model for variable selection. After creating the model, I used the `varImp()` function to select the desired variables for the model. I also used a kichen sink model as my initial setup to organize the variables from most to least influential.
+
+# Recipe Building
+I used the same recipe for both my models and used the following steps: `step_impute_knn()`, `step_dummy()`, `step_zv()`, `step_normalize()`, `step_corr()`, and `step_YeoJohnson()`.
+
+# Resampling Technique
+For resampling, I used a v-fold cross-validation technique with 10 folds and 5 repeats. 
+
+# Models Used + Parameters
+
+## Stack Model
+- **Neural Network**
+    - Parameters: `hidden_units` and `penalty`
+    
+- **Random Forest**
+    - Parameters: `min_n` and `mtry`
+    
+    - Also updated `mtry` to have a range of (0,10)
+    
+- **SVM Radial**
+    - Parameters: `cost` and `rbf_sigma`
+    
+- **Stacked model**
+    - Penalty values:
+
+        - I used a penalty of : `blend_penalty <- c(10^(-6:-1), 0.5, 1, 1.5, 2)`
+        
+        - Class explanation for this penalty:
+        
+            - `10^(-6:-1)` represents a sequence of elements between `-6 and -1` that are each raised 10 to the power of each element. 
+            
+            - This produces the following values: `0.000001, 0.00001, 0.0001, 0.001, 0.01`
+            
+            - `0.5, 1, 1.5, 2` are manually set values that are defined in the vector.
+
+## Stack Model + KNN
+This is the same as the previous model with the addition of **KNN**. The additional tuning parameter was `neighbors`.
+
+I used a stacked model for this problem to see I could improve the overall `rmse` with additional models
+
+
+# Model Results
+Both models achieved an `rmse` less than 9.0, which completed the original goal of the lab. The stacked model with KNN was slightly lower that the other stacked mdoel, but both performed very similarly.
+```{r}
+library(knitr)
+
+knitr::include_graphics("metric_results/reg_rmse.png")
+
+library(readr)
+stacked_predb <- read_csv("data/stack_model_attempt_r6/submissions/stacked_predb.csv")
+```
+
+
+# Conclusion
+In conclusion, This exploration was able to confirm that a machine learning model could be built with the given dataset that could produce an `rmse` less than 9.0. I enjoyed putting this together, and in the future, it would be interesting to add even more models to the stacked model to compare the results. 
